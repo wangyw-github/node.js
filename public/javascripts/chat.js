@@ -12,8 +12,6 @@ Chat.prototype.sendMessage = function(room, text) {
 	console.log('###### sendMessage : ' + room);
 	console.log('###### sendMessage : ' + text);
 
-	console.log('this.socket : ' + this.socket);
-
 	this.socket.emit('message', message);
 };
 

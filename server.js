@@ -1,10 +1,10 @@
-var http = require('./http');
+var http = require('http');
 
-var fs = require('./fs');
+var fs = require('fs');
 
-var mime = require('./mime');
+var mime = require('mime');
 
-var path = require('./path');
+var path = require('path');
 
 var cache = {};
 

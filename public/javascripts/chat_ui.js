@@ -1,3 +1,16 @@
+/**
+ * create by wangyw on 18.07.15
+ * @type {jQuery|HTMLElement}
+ */
+
+
+let send_message = $('#send-message');
+let messages = $('#messages');
+let send_form = $("#send-form");
+let room_list = $('#room-list');
+let room_list_div = $("#room-list div");
+let _room = $('#room');
+
 function divEscapedContentElement(message) {
 	return $('<div></div>').text(message);
 }
@@ -7,26 +20,24 @@ function divSystemContentElement(message) {
 }
 
 function processUserInput(chatApp, socket) {
-	var message = $('#send-message').val();
+	var message = send_message.val();
 	var systemMessage;
 
-	if (message.charAt(0) == '/') {
+	if (message.charAt(0) === '/') {
 		systemMessage = chatApp.processCommand(message);
 		if (systemMessage) {
-			$('#messages').append(divSystemContentElement(systemMessage));
+            messages.append(divSystemContentElement(systemMessage));
 		}
 	} else {
-		chatApp.sendMessage($('#room').text(), message);
-		$('#messages').append(divEscapedContentElement(message));
-		$('#messages').scrollTop($('#messages').prop('scrollHeight'));
+		chatApp.sendMessage(_room.text(), message);
+        messages.append(divEscapedContentElement(message));
+        messages.scrollTop(messages.prop('scrollHeight'));
 	}
 
-	$('#send-message').val('');
+	send_message.val('');
 }
 
 var socket = io.connect();
-
-console.log('######### socket : ' + io);
 
 $(document).ready(function () {
 	var chatApp = new Chat(socket);
@@ -38,32 +49,33 @@ $(document).ready(function () {
 		} else {
 			message = result.message;
 		}
-		$('#messages').append(divSystemContentElement(message));
+        messages.append(divSystemContentElement(message));
 	});
 
 	socket.on('joinResult', function (result) {
-		$("#room").text(result.room);
-		$("#messages").append(divSystemContentElement('Room changed.'));
+        _room.text(result.room);
+		messages.append(divSystemContentElement('Room changed.'));
 	});
 
 	socket.on('message', function (message) {
 		var newElement = $('<div></div>').text(message.text);
-		$('#messages').append(newElement);
+        messages.append(newElement);
 	});
 
 	socket.on('rooms', function (rooms) {
-		$('room-list').empty();
+		room_list.empty();
 
 		for (var room in rooms) {
+			if (!rooms.hasOwnProperty(room)) {return;}
 			room = room.substring(1, room.length);
-			if (room != '') {
-				$('room-list').append(divEscapedContentElement(room));
+			if (room !== '') {
+				room_list.append(divEscapedContentElement(room));
 			}
 		}
 
-		$("#room-list div").click(function () {
+		room_list_div.click(function () {
 			chatApp.processCommand('/join ' + $(this).text());
-			$("#send-message").focus();
+			send_message.focus();
 		});
 	});
 
@@ -71,9 +83,9 @@ $(document).ready(function () {
 		socket.emit('rooms');
 	}, 1000);
 
-	$("#send-message").focus();
+	send_message.focus();
 
-	$("#send-form").submit(function () {
+    send_form.submit(function () {
 		processUserInput(chatApp, socket);
 		return false;
 	});
